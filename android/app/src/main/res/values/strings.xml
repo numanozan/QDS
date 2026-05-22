@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">QDS</string>
+    <string name="accessibility_service_description">QDS, Reels ve Shorts içeriklerini engellemek için ekran içeriğini okur.</string>
+</resources>
