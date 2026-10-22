@@ -1,0 +1,50 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - run: npm ci
+
+      # Kişisel kullanım: release build, repodaki debug keystore ile imzalanır.
+      # Hep aynı key olduğu için sonraki APK'lar üstüne güncelleme olarak kurulur.
+      - name: Build release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon \
+            -PMYAPP_UPLOAD_STORE_FILE=debug.keystore \
+            -PMYAPP_UPLOAD_STORE_PASSWORD=android \
+            -PMYAPP_UPLOAD_KEY_ALIAS=androiddebugkey \
+            -PMYAPP_UPLOAD_KEY_PASSWORD=android
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk QDS.apk
+          gh release create "build-${{ github.run_number }}" QDS.apk \
+            --title "QDS build ${{ github.run_number }}" \
+            --notes "Commit ${{ github.sha }}" \
+            --latest
