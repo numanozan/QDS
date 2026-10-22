@@ -18,14 +18,17 @@ class BlockModule(private val reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun baslat(reels: Boolean, shorts: Boolean) {
-        BlockAccessibilityService.isActive = true
-        BlockAccessibilityService.reelsEngelleniyor = reels
-        BlockAccessibilityService.shortsEngelleniyor = shorts
+        BlockAccessibilityService.durumKaydet(reactContext, true, reels, shorts)
     }
 
     @ReactMethod
     fun durdur() {
-        BlockAccessibilityService.isActive = false
+        BlockAccessibilityService.durumKaydet(
+            reactContext,
+            false,
+            BlockAccessibilityService.reelsEngelleniyor,
+            BlockAccessibilityService.shortsEngelleniyor
+        )
     }
 
     @ReactMethod

@@ -33,6 +33,7 @@ function App() {
           setInstagramSecili(insta === 'true');
           setYoutubeSecili(yt === 'true');
           setEkran('aktif');
+          BlockModule.baslat(insta === 'true', yt === 'true');
         }
 
         const enIyi = await AsyncStorage.getItem('enIyiSure');

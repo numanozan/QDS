@@ -28,6 +28,7 @@ class BlockAccessibilityService : AccessibilityService() {
         info.packageNames = arrayOf("com.instagram.android", "com.google.android.youtube")
         serviceInfo = info
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        durumYukle(this)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -150,8 +151,33 @@ class BlockAccessibilityService : AccessibilityService() {
     override fun onInterrupt() {}
 
     companion object {
-        var isActive = false
-        var reelsEngelleniyor = true
-        var shortsEngelleniyor = true
+        private const val PREFS = "BlockPrefs"
+        private const val KEY_ACTIVE = "engel_aktif"
+        private const val KEY_REELS = "reels_engelli"
+        private const val KEY_SHORTS = "shorts_engelli"
+
+        // RAM cache; asıl kaynak SharedPreferences. Process ölüp servis yeniden
+        // bağlandığında onServiceConnected bunları diskten tekrar yükler.
+        @Volatile var isActive = false
+        @Volatile var reelsEngelleniyor = true
+        @Volatile var shortsEngelleniyor = true
+
+        fun durumYukle(context: Context) {
+            val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            isActive = prefs.getBoolean(KEY_ACTIVE, false)
+            reelsEngelleniyor = prefs.getBoolean(KEY_REELS, true)
+            shortsEngelleniyor = prefs.getBoolean(KEY_SHORTS, true)
+        }
+
+        fun durumKaydet(context: Context, aktif: Boolean, reels: Boolean, shorts: Boolean) {
+            isActive = aktif
+            reelsEngelleniyor = reels
+            shortsEngelleniyor = shorts
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .putBoolean(KEY_ACTIVE, aktif)
+                .putBoolean(KEY_REELS, reels)
+                .putBoolean(KEY_SHORTS, shorts)
+                .apply()
+        }
     }
 }
